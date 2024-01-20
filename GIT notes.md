@@ -2,11 +2,11 @@ ________________________________________________________________________________
 # GIT NOTES!
 ____________________________________________________________________________________________________________________
 
-##info repo FTN
+## info repo FTN
     - personal git repo: *<user>@147.91.175.165:/stud/<user>/esl*
     - group y24-g00 git repo: *<user>@147.91.175.165:/stud/y24-g00/*
     
-##links used: 
+## links used: 
     - https://learngitbranching.js.org/
     - https://git-scm.com/
     - https://www.youtube.com/watch?v=USjZcfj8yxE
