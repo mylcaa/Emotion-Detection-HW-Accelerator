@@ -58,6 +58,47 @@ def landmark_detector_dlib(image) :
     
         return landmarks
 
+#underneath is the code for testing without dlibs recognition of a face
+'''
+def landmark_detector_dlib(image) :
+    
+    #image = imutils.resize(image, width=500)
+    image = cv2.resize(image, [500, 500])
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # detect faces in the grayscale image
+    faces = detector(gray, 1)
+    #new_faces = detect_bounding_box(gray)
+    # go through the face bounding boxes
+    if len(faces) < 1:
+        #In case no case selected, print "error" values
+        #u slucaju da nema detektovanog lica vrati error
+        #vrati landmarkse
+        return np.zeros((68, 2))
+
+    #if len(new_faces) < 1:
+        #In case no case selected, print "error" values
+        #u slucaju da nema detektovanog lica vrati error
+        #vrati landmarkse
+    #    return np.zeros((68, 2))
+    else:
+        #for face in faces:        
+            # apply the shape predictor to the face ROI
+        #    shape = predictor(gray, dlib.rectangle(new_faces[0], new_faces[1], new_faces[2], new_faces[3]))
+        shape = predictor(gray, faces)
+
+        landmarks = np.zeros((68, 2))
+        #print(result)
+        for n in range(17, 68): # NIJE POTREBAN OKVIR FACE!
+                x = shape.part(n).x
+                y = shape.part(n).y
+                #print("Landmark ID: ", n, "X coordinate: ", x, "Y coordinate: ", y)
+                landmarks[n] = x, y
+    
+        return landmarks
+
+'''
+
+
 
 def distance_calculator_test(frame, landmark_pairs): 
     distances = [np.sqrt((frame[p1][0] - frame[p2][0])**2 +
