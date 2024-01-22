@@ -33,7 +33,7 @@ landmark_pairs = [(37, 41), (38, 40), (43, 47), (44, 46),
 def landmark_detector_dlib(image) :
     
     #image = imutils.resize(image, width=500)q
-    #image = cv2.resize(image, [500, 500])
+    image = cv2.resize(image, [250, 250]) # results bad recognition sometimes!
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     # detect faces in the grayscale image
     faces = detector(gray, 1)
