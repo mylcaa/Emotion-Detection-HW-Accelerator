@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import dlib
@@ -12,11 +11,7 @@ import random
 import matplotlib.pyplot as plt
 import pickle
 
-#images = glob.glob("C:/Users/nikol/OneDrive/Desktop/AI-ML/Project_ML_4th_year/fane_data/%s//*" %emotion) #glob biblioteka->pronalazi 
-#PREDICTOR_PATH = "C:/Users/nikol/OneDrive/Desktop/AI-ML/Project_ML_4th_year/AdaBoost_DLib/shape_predictor_68_face_landmarks"
-#os.remove('C:/Users/nikol/OneDrive/Desktop/AI-ML/Project_ML_4th_year/AdaBoost_DLib/predicted_model/model.pkl')
-
-#TODO: smanjPREDICTOR_PATH = "C:/Users/nikol/OneDrive/Desktop/AI-ML/Project_ML_4th_year/AdaBoost_DLib/shape_predictor_68_face_landmarks"
+#TODO: smanjiti velicinu matrice landmarks u landmark_detector_dlib sa 68 na 68-16
 
 # 68 point face model
 PREDICTOR_PATH = "/home/catic/Documents/project/AdaBoost_DLib/shape_predictor_68_face_landmarks"
@@ -36,7 +31,7 @@ def load_images_from_folder(folder):
     return images
 
 def get_files(emotion): #koristi se za dobijanje skupa test i trening podataka
-    images = glob.glob("/home/catic/Documents/project/DataSetCK+/CK+48/%s//*" %emotion) #glob biblioteka->pronalazi 
+    images = glob.glob("/home/catic/Documents/project/other/DataSetCK+/CK+48/%s//*" %emotion) #glob biblioteka->pronalazi 
     #sve datoteke u odredjenom direktorijuumu koji sadzi slike za odredjenu emociju
     #datoteke se smijestaju u listu image
     random.shuffle(images) #pronadjene slike se mijesaju da ide podjednako na test i trening
@@ -150,29 +145,30 @@ def distance_calculator_test(frame, landmark_pairs):
     return distances
 
 if __name__ == '__main__':
-    slike_train, slike_test = get_files('fear') 
-    training_data, training_label, testing_data, testing_label = make_sets()
-    print("Length of Training Data: ", len(training_data))
-    print("Length of training_label: ", len(training_label))
-    print("Length of testing_data: ", len(testing_data))
-    print("Length of testing_label: ", len(testing_label))
-    print("Length of Training Data INDEX 0", len(training_data[0]))
+    #slike_train, slike_test = get_files('fear') 
+    for i in range(0,25): 
+        training_data, training_label, testing_data, testing_label = make_sets()
+        print("Length of Training Data: ", len(training_data))
+        print("Length of training_label: ", len(training_label))
+        print("Length of testing_data: ", len(testing_data))
+        print("Length of testing_label: ", len(testing_label))
+        print("Length of Training Data INDEX 0", len(training_data[0]))
 
-    feature_vectors_training, feature_vectors_testing = distance_calculator(training_data, testing_data, landmark_pairs)
-    print("Length of feature vectors training: ", len(feature_vectors_training), "Length of feature vector testing", len(feature_vectors_testing))
-    print("Length of feature vectors training index 10: ", len(feature_vectors_training[10]), "Length of feature vector testing index 10", len(feature_vectors_testing[10]))
+        feature_vectors_training, feature_vectors_testing = distance_calculator(training_data, testing_data, landmark_pairs)
+        print("Length of feature vectors training: ", len(feature_vectors_training), "Length of feature vector testing", len(feature_vectors_testing))
+        print("Length of feature vectors training index 10: ", len(feature_vectors_training[10]), "Length of feature vector testing index 10", len(feature_vectors_testing[10]))
+        
+        # Convert to numpy array
+        feature_array_training = np.array(feature_vectors_training)
+        feature_array_testing = np.array(feature_vectors_testing)
+        
+        # Train the model
+        max_accuracy = 0
     
-    # Convert to numpy array
-    feature_array_training = np.array(feature_vectors_training)
-    feature_array_testing = np.array(feature_vectors_testing)
-
-    base_classifier = DecisionTreeClassifier(max_depth=2)
-    base_classifier_SVM = SVC(kernel='rbf', C=1.0, gamma='scale', probability=True)    # Train the model
-    max_accuracy = 0
-    for i in range(1,10): 
         # Create a weak classifier (e.g., decision tree)
+        base_classifier = DecisionTreeClassifier(max_depth=2)
         # Create AdaBoost classifier
-        adaboost_classifier = AdaBoostClassifier(base_classifier, n_estimators = 100*i, random_state=42)
+        adaboost_classifier = AdaBoostClassifier(base_classifier, n_estimators=100, random_state=42)
         adaboost_classifier.fit(feature_array_training, training_label)
         # Make predictions
         label_prediction = adaboost_classifier.predict(feature_array_testing)
@@ -181,31 +177,37 @@ if __name__ == '__main__':
 
         if accuracy > max_accuracy:
             max_accuracy = accuracy
-            adaboost_classifier_max = adaboost_classifier
-        """
-        try:
-            os.remove('C:/Users/nikol/OneDrive/Desktop/AI-ML/Project_ML_4th_year/AdaBoost_DLib/predicted_model/model.pkl')
-        except OSError:
-            pass
-        output = open('C:/Users/nikol/OneDrive/Desktop/AI-ML/Project_ML_4th_year/AdaBoost_DLib/predicted_model/model.pkl', 'wb')
-        pickle.dump(adaboost_classifier_max, output)
-        output.close()
-        
-        adaboost_classifier_SVM = AdaBoostClassifier(base_classifier_SVM, n_estimators=100, random_state=42, algorithm= 'SAMME')
-        adaboost_classifier_SVM.fit(feature_array_training, training_label)
-        
-        label_prediction_SVM = adaboost_classifier_SVM.predict(feature_array_testing)
-        accuracy_SVM = accuracy_score(testing_label, label_prediction_SVM)
-        print("Iteration: ", i, f" Accuracy OF SVM: {accuracy_SVM}")         
-        #adaboost_classifier = 0
-        #base_classifier = 0 
-        """ 
+            adaboost_classifier_max = adaboost_classifier 
+
+    
     print(f"Best Accuracy: {max_accuracy}") 
- 
+    i = 0
+    for label in label_prediction:
+
+        print("Predicted Label index: ", label, "Real Label index: ", testing_label[i])
+        print("Predicted Label: ", emotions[label], "Real Label: ", emotions[testing_label[i]])
+        i = i + 1
+
+    #print('Best accuracy = ', max_accur*100, 'percent')
+    #print(max_clf)
+    
+    testing_data = []
+    image_test = cv2.imread("/home/catic/Documents/project/AdaBoost_DLib/vuk.jpg")
+    image_test_landmark = landmark_detector_dlib(image_test)
+    print(len(image_test_landmark))
+    image_test_distance = distance_calculator_test(image_test_landmark, landmark_pairs)
+    print(len(image_test_distance))
+    testing_data.append(image_test_distance)
+    image_test_distance_array = np.array(testing_data)
+    #image_test_distance_array = image_test_distance_array.reshape(1,-1)
+    predicted_label = adaboost_classifier_max.predict(image_test_distance_array)
+    predicted_label = predicted_label[0]
+    print("Real Label: Vuk", "Predicted Label: ", predicted_label)
+    
     try:
-        os.remove('/home/catic/Documents/project/AdaBoost_DLib/predicted_model/model.pkl')
+        os.remove('/home/catic/Documents/project/AdaBoost_DLib/predicted_model/model_new.pkl')
     except OSError:
         pass
-    output = open('/home/catic/Documents/project/AdaBoost_DLib/predicted_model/model.pkl', 'wb')
+    output = open('/home/catic/Documents/project/AdaBoost_DLib/predicted_model/model_new.pkl', 'wb')
     pickle.dump(adaboost_classifier_max, output)
     output.close()
